@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+    
+    
+    <head>
+        
+        <link rel="shortcut icon" href="http://d-bird.org/nyca%20fav%20icon.ico">
+        <title>D-Bird Data Visualization</title>
+        <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/themes/css/cartodb.css" />
+        <script src="http://libs.cartocdn.com/cartodb.js/v3/cartodb.js"></script>
+
+        <style>
+            
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                }
+            
+            #button_group{
+                position: absolute;
+                z-index: 2;
+                left: 20px;
+                top: 88px;
+            }
+        
+            .year_button {
+                background: #FFFFFF;
+                cursor: pointer;
+                font-family: "Helvetica", Arial;
+                font-size: 12px;
+                padding: 10px;
+                margin: 4px;
+                color: #666666;
+                vertical-align: middle;
+                border-style: solid;
+                border-color: #999;
+                border-width: 1px;
+                border-radius: 4px;
+                box-shadow: rgba(0, 0, 0, 0.2) 0 0 4px 2px;
+                }
+            
+            .year_button:hover {
+                background: gray;
+            }
+            
+            
+            #map {
+                position: absolute;
+                height: 100%;
+                width: 100%;
+                z-index: 1;
+                }
+            
+            #counter {
+                background: #FFFFFF;
+                cursor: text;
+                font-family: "Helvetica", Arial;
+                text-transform: uppercase;
+                font-weight: bold;
+                font-size: 12px;
+                color: #666666;
+                height: 25px;
+                width: 80px;
+                padding-top: 5px;
+                padding-left: 12px;
+                padding-right: 12px;
+                padding-bottom: 28px;
+                position: absolute;
+                right: 25px;
+                top: 88px;
+                z-index: 2;
+                vertical-align: middle;
+                border-style: solid;
+                border-color: #999;
+                border-width: 1px;
+                border-radius: 4px;
+                box-shadow: rgba(0, 0, 0, 0.2) 0 0 4px 2px;
+                }
+            
+            #count {
+                font-weight: bolder;
+                font-size: 14.5px;
+                color: black;
+                display: inline;
+                }
+            
+            #year {
+                font-size: 13px;
+                }
+
+        </style>
+        
+    </head>
+    
+    
+    <body>
+        
+        <div id="map"></div>
+        
+        <div id="counter">
+            <div id="count"></div> birds found in<div id="year"></div>
+        </div>
+        
+        <div id="button_group">              
+            <button class="year_button" value="2014">2014</button></p>
+            <button class="year_button" value="2015">2015</button></p>
+            <button class="year_button" value="2016">2016</button>  
+        </div> 
+    
+        <script>
+            
+            $(document).ready(function () {
+                
+                //RETRIEVES CARTODB MAP AS BASELAYER
+                var dataLayer;
+    
+                cartodb.createVis('map', 'https://dklein.cartodb.com/api/v2/viz/f92a98ce-d454-11e5-9389-0ecfd53eb7d3/viz.json', {
+                    cartodb_logo: false,
+                    title: false,
+                    description: false,
+                    search: false,
+                    zoom: 6,
+                    center_lat: 31.364162,
+                    center_lon: -99.018081,
+                })
+                
+                
+            //FUNCTIONS THAT ARE RUN WHEN PAGE IS DONE LOADING    
+                .done(function (vis, layers) {
+                    
+                    vis.map.set({
+                        maxZoom: 12
+                    });
+                    
+              //SETS ONLOAD LAYER TO CURRENT YEAR WHEN PAGE LOADS       
+                var query = "SELECT * FROM d_bird_tx WHERE DATE_PART('year', datefound) = ";    
+                var b = new Date();
+                var year = b.getFullYear();
+                        
+                query = query + year;
+                    
+                dataLayer = layers[1].getSubLayer(0).setSQL(query);
+                    
+                //FILLS 'YEAR' WITH CURRENT YEAR
+                var d = new Date();
+                var n = d.getFullYear();
+                document.getElementById("year").innerHTML = n;  
+                    
+                    
+                    
+                //FILLS "COUNT" WITH COUNT FROM CURRENT YEAR WHEN PAGE LOADS  
+                var query2 = "http://dklein.cartodb.com/api/v2/sql?q=SELECT%20count(*)%20FROM%20d_bird_tx%20WHERE%20DATE_PART(%27year%27%2Cdatefound)%20%3D";    
+                var b2 = new Date();
+                var year2 = b2.getFullYear();
+                        
+                query2 = query2 + year2;
+                    
+                $.getJSON(query2, function (data) {
+               
+                var items = data.rows[0];
+                var count = items.count;
+              
+                $("#count").prepend(count);
+                }); 
+                    
+            });
+                
+    
+                
+            //DISPLAYS LAYER, CHANGES COUNT, CHANGES YEAR
+             $('.year_button').click(function () {
+                 
+                year = $(this).val();
+                document.getElementById("year").innerHTML = year;
+                 
+                dataLayer.setSQL("SELECT * FROM d_bird_tx WHERE DATE_PART('year', datefound) = "+year+"");
+                $.getJSON("http://dklein.cartodb.com/api/v2/sql?q=SELECT%20COUNT%20(*)%20FROM%20d_bird_tx%20WHERE%20DATE_PART(%27year%27%2Cdatefound)%20%3D"+year+"", function (data) {
+               
+                var items = data.rows[0];
+                var count = items.count;
+              
+                $("#count").empty();
+                $("#count").prepend(count);
+                });
+            });
+          
+        });
+            
+        </script>
+        
+               
+    </body>
+    
+    
+    
+</html>
