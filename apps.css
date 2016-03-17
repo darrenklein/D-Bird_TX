@@ -200,3 +200,34 @@ input[type="text"][readonly]{
 	background-color: white;
 	cursor: text;
 }
+
+
+#fileToUpload{
+    width: 40%;
+}
+
+#clear{
+    display: inline-block;
+    color: #FF0000;
+    cursor: pointer;
+}
+
+#clear:hover{
+    color: #AF0000;
+}
+
+
+#fileToUploadMobile{
+    width: 65%;
+}
+
+#clearMobile{
+    display: inline-block;
+    color: #FF0000;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+#clearMobile:hover{
+    color: #AF0000;
+}
